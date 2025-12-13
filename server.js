@@ -1,7 +1,6 @@
 /**
  * Intelligent Marketplace – Wallet Backend
  * ROLE: Relay + Helper (NON-AUTHORITATIVE)
- * Render Free Plan Safe
  */
 
 const express = require("express");
@@ -12,17 +11,13 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-/* =========================
-   ENV VARIABLES (REQUIRED)
-========================= */
-const BOT_TOKEN = process.env.BOT_TOKEN;   // Telegram bot token
-const ADMIN_ID = process.env.ADMIN_ID;     // Admin Telegram ID
+const BOT_TOKEN = process.env.BOT_TOKEN;
+const ADMIN_ID = process.env.ADMIN_ID;
 
 /* =========================
-   RUNTIME MEMORY (TEMP)
-   Clears when Render sleeps
+   TEMP RUNTIME MEMORY
 ========================= */
-const runtimeBalances = {}; // { userId: balance }
+const runtimeBalances = {};
 
 /* =========================
    HEALTH CHECK
@@ -33,7 +28,6 @@ app.get("/", (req, res) => {
 
 /* =========================
    GET MIRROR BALANCE
-   (NOT SOURCE OF TRUTH)
 ========================= */
 app.get("/wallet/:userId", (req, res) => {
   const { userId } = req.params;
@@ -50,7 +44,6 @@ app.get("/wallet/:userId", (req, res) => {
 
 /* =========================
    MIRROR BALANCE (OPTIONAL)
-   Frontend may call this
 ========================= */
 app.post("/mirror/balance", (req, res) => {
   const { userId, balance } = req.body;
@@ -61,15 +54,11 @@ app.post("/mirror/balance", (req, res) => {
 
   runtimeBalances[userId] = balance;
 
-  res.json({
-    success: true,
-    mirrored: true
-  });
+  res.json({ success: true });
 });
 
 /* =========================
-   TELEGRAM RELAY
-   BACKUP NOTIFIER
+   TELEGRAM RELAY (BACKUP)
 ========================= */
 app.post("/notify", async (req, res) => {
   const { chatId, message } = req.body;
