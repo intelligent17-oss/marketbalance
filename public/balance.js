@@ -1,4 +1,4 @@
-const walletBalances = {
+window.walletBalances = {
   123456789: 50000,
   8140042906: 500000,
   7227113353: 3500
