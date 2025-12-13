@@ -1,6 +1,6 @@
 /**
  * Intelligent Marketplace – Wallet Backend
- * ROLE: Relay + Helper (NON-AUTHORITATIVE)
+ * ROLE: Static balance provider + Telegram relay
  */
 
 const express = require("express");
@@ -11,54 +11,20 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-const BOT_TOKEN = process.env.BOT_TOKEN;
-const ADMIN_ID = process.env.ADMIN_ID;
+// ✅ SERVE STATIC FILES (balance.js)
+app.use(express.static("public"));
 
-/* =========================
-   TEMP RUNTIME MEMORY
-========================= */
-const runtimeBalances = {};
+const BOT_TOKEN = process.env.BOT_TOKEN;
 
 /* =========================
    HEALTH CHECK
 ========================= */
 app.get("/", (req, res) => {
-  res.send("✅ Wallet backend running (relay mode)");
+  res.send("✅ Wallet backend running");
 });
 
 /* =========================
-   GET MIRROR BALANCE
-========================= */
-app.get("/wallet/:userId", (req, res) => {
-  const { userId } = req.params;
-
-  if (typeof runtimeBalances[userId] !== "number") {
-    return res.json({ exists: false });
-  }
-
-  res.json({
-    exists: true,
-    balance: runtimeBalances[userId]
-  });
-});
-
-/* =========================
-   MIRROR BALANCE (OPTIONAL)
-========================= */
-app.post("/mirror/balance", (req, res) => {
-  const { userId, balance } = req.body;
-
-  if (!userId || typeof balance !== "number") {
-    return res.status(400).json({ error: "Invalid payload" });
-  }
-
-  runtimeBalances[userId] = balance;
-
-  res.json({ success: true });
-});
-
-/* =========================
-   TELEGRAM RELAY (BACKUP)
+   TELEGRAM RELAY (OPTIONAL BACKUP)
 ========================= */
 app.post("/notify", async (req, res) => {
   const { chatId, message } = req.body;
